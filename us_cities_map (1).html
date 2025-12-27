@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Cities Map</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:wght@600&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 28px;
+            color: #1e293b;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        
+        .map-area {
+            position: relative;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .state-circle {
+            fill: url(#stateGrad);
+            stroke: none;
+            transition: all 0.2s;
+        }
+        
+        .state-circle:hover {
+            fill: #bfdbfe;
+            transform-origin: center;
+        }
+        
+        .state-label {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 10px;
+            font-weight: 400;
+            fill: #64748b;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
+        
+        .city-marker {
+            cursor: pointer;
+        }
+        
+        .city-marker:hover .marker-inner {
+            r: 10;
+        }
+        
+        .marker-pulse {
+            fill: #ec4899;
+            opacity: 0;
+            animation: pulse 2s ease-out infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; r: 8; }
+            100% { opacity: 0; r: 25; }
+        }
+        
+        .marker-outer {
+            fill: #ec4899;
+            opacity: 0.3;
+        }
+        
+        .marker-inner {
+            fill: #db2777;
+            stroke: white;
+            stroke-width: 2.5;
+            transition: r 0.2s;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+        
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #334155;
+        }
+        
+        .tooltip.show {
+            opacity: 1;
+        }
+        
+        .tooltip strong {
+            display: block;
+            font-size: 14px;
+        }
+        
+        .tooltip span {
+            font-size: 12px;
+            color: #f472b6;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 24px;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #475569;
+            background: linear-gradient(135deg, #fdf2f8, #eff6ff);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        
+        .legend-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(236,72,153,0.15);
+            border-color: #f9a8d4;
+        }
+        
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #ec4899, #db2777);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cities I Visited This Year</h1>
+        <p class="subtitle">Hover over markers to explore</p>
+        
+        <div class="map-area">
+            <div class="tooltip" id="tooltip">
+                <strong id="tipName"></strong>
+                <span id="tipState"></span>
+            </div>
+            
+            <svg viewBox="0 0 520 340" id="map">
+                <defs>
+                    <linearGradient id="stateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#dbeafe"/>
+                        <stop offset="100%" stop-color="#fce7f3"/>
+                    </linearGradient>
+                </defs>
+                
+                <!-- States as circles in US-shaped grid layout -->
+                <!-- Row 1 -->
+                <g><circle class="state-circle" cx="65" cy="35" r="18"/><text class="state-label" x="65" y="35">WA</text></g>
+                <g><circle class="state-circle" cx="130" cy="35" r="18"/><text class="state-label" x="130" y="35">MT</text></g>
+                <g><circle class="state-circle" cx="170" cy="35" r="18"/><text class="state-label" x="170" y="35">ND</text></g>
+                <g><circle class="state-circle" cx="210" cy="35" r="18"/><text class="state-label" x="210" y="35">MN</text></g>
+                <g><circle class="state-circle" cx="290" cy="35" r="18"/><text class="state-label" x="290" y="35">WI</text></g>
+                <g><circle class="state-circle" cx="410" cy="35" r="18"/><text class="state-label" x="410" y="35">VT</text></g>
+                <g><circle class="state-circle" cx="450" cy="35" r="18"/><text class="state-label" x="450" y="35">NH</text></g>
+                <g><circle class="state-circle" cx="490" cy="35" r="18"/><text class="state-label" x="490" y="35">ME</text></g>
+                
+                <!-- Row 2 -->
+                <g><circle class="state-circle" cx="45" cy="75" r="18"/><text class="state-label" x="45" y="75">OR</text></g>
+                <g><circle class="state-circle" cx="85" cy="75" r="18"/><text class="state-label" x="85" y="75">ID</text></g>
+                <g><circle class="state-circle" cx="130" cy="75" r="18"/><text class="state-label" x="130" y="75">WY</text></g>
+                <g><circle class="state-circle" cx="170" cy="75" r="18"/><text class="state-label" x="170" y="75">SD</text></g>
+                <g><circle class="state-circle" cx="210" cy="75" r="18"/><text class="state-label" x="210" y="75">IA</text></g>
+                <g><circle class="state-circle" cx="250" cy="75" r="18"/><text class="state-label" x="250" y="75">MI</text></g>
+                <g><circle class="state-circle" cx="330" cy="75" r="18"/><text class="state-label" x="330" y="75">NY</text></g>
+                <g><circle class="state-circle" cx="450" cy="75" r="18"/><text class="state-label" x="450" y="75">MA</text></g>
+                
+                <!-- Row 3 -->
+                <g><circle class="state-circle" cx="45" cy="115" r="18"/><text class="state-label" x="45" y="115">NV</text></g>
+                <g><circle class="state-circle" cx="85" cy="115" r="18"/><text class="state-label" x="85" y="115">UT</text></g>
+                <g><circle class="state-circle" cx="130" cy="115" r="18"/><text class="state-label" x="130" y="115">CO</text></g>
+                <g><circle class="state-circle" cx="170" cy="115" r="18"/><text class="state-label" x="170" y="115">NE</text></g>
+                <g><circle class="state-circle" cx="210" cy="115" r="18"/><text class="state-label" x="210" y="115">IL</text></g>
+                <g><circle class="state-circle" cx="250" cy="115" r="18"/><text class="state-label" x="250" y="115">IN</text></g>
+                <g><circle class="state-circle" cx="290" cy="115" r="18"/><text class="state-label" x="290" y="115">OH</text></g>
+                <g><circle class="state-circle" cx="330" cy="115" r="18"/><text class="state-label" x="330" y="115">PA</text></g>
+                <g><circle class="state-circle" cx="370" cy="115" r="18"/><text class="state-label" x="370" y="115">NJ</text></g>
+                <g><circle class="state-circle" cx="450" cy="115" r="18"/><text class="state-label" x="450" y="115">CT</text></g>
+                <g><circle class="state-circle" cx="490" cy="115" r="18"/><text class="state-label" x="490" y="115">RI</text></g>
+                
+                <!-- Row 4 -->
+                <g><circle class="state-circle" cx="25" cy="155" r="18"/><text class="state-label" x="25" y="155">CA</text></g>
+                <g><circle class="state-circle" cx="85" cy="155" r="18"/><text class="state-label" x="85" y="155">AZ</text></g>
+                <g><circle class="state-circle" cx="130" cy="155" r="18"/><text class="state-label" x="130" y="155">NM</text></g>
+                <g><circle class="state-circle" cx="170" cy="155" r="18"/><text class="state-label" x="170" y="155">KS</text></g>
+                <g><circle class="state-circle" cx="210" cy="155" r="18"/><text class="state-label" x="210" y="155">MO</text></g>
+                <g><circle class="state-circle" cx="250" cy="155" r="18"/><text class="state-label" x="250" y="155">KY</text></g>
+                <g><circle class="state-circle" cx="290" cy="155" r="18"/><text class="state-label" x="290" y="155">WV</text></g>
+                <g><circle class="state-circle" cx="330" cy="155" r="18"/><text class="state-label" x="330" y="155">VA</text></g>
+                <g><circle class="state-circle" cx="370" cy="155" r="18"/><text class="state-label" x="370" y="155">MD</text></g>
+                <g><circle class="state-circle" cx="410" cy="155" r="18"/><text class="state-label" x="410" y="155">DE</text></g>
+                
+                <!-- Row 5 -->
+                <g><circle class="state-circle" cx="130" cy="195" r="18"/><text class="state-label" x="130" y="195">OK</text></g>
+                <g><circle class="state-circle" cx="170" cy="195" r="18"/><text class="state-label" x="170" y="195">AR</text></g>
+                <g><circle class="state-circle" cx="210" cy="195" r="18"/><text class="state-label" x="210" y="195">TN</text></g>
+                <g><circle class="state-circle" cx="290" cy="195" r="18"/><text class="state-label" x="290" y="195">NC</text></g>
+                <g><circle class="state-circle" cx="330" cy="195" r="18"/><text class="state-label" x="330" y="195">SC</text></g>
+                
+                <!-- Row 6 -->
+                <g><circle class="state-circle" cx="130" cy="235" r="18"/><text class="state-label" x="130" y="235">TX</text></g>
+                <g><circle class="state-circle" cx="170" cy="235" r="18"/><text class="state-label" x="170" y="235">LA</text></g>
+                <g><circle class="state-circle" cx="210" cy="235" r="18"/><text class="state-label" x="210" y="235">MS</text></g>
+                <g><circle class="state-circle" cx="250" cy="235" r="18"/><text class="state-label" x="250" y="235">AL</text></g>
+                <g><circle class="state-circle" cx="290" cy="235" r="18"/><text class="state-label" x="290" y="235">GA</text></g>
+                
+                <!-- Row 7 - Florida -->
+                <g><circle class="state-circle" cx="330" cy="275" r="18"/><text class="state-label" x="330" y="275">FL</text></g>
+                
+                <!-- Alaska and Hawaii -->
+                <g><circle class="state-circle" cx="55" cy="275" r="18"/><text class="state-label" x="55" y="275">AK</text></g>
+                <g><circle class="state-circle" cx="55" cy="315" r="18"/><text class="state-label" x="55" y="315">HI</text></g>
+                
+                <!-- DC small -->
+                <g><circle class="state-circle" cx="390" cy="175" r="12"/><text class="state-label" x="390" y="175" style="font-size:8px">DC</text></g>
+                
+                <!-- City markers with approximate positions -->
+                <!-- Richmond, VA -->
+                <g class="city-marker" data-name="Richmond" data-state="Virginia">
+                    <circle class="marker-pulse" cx="330" cy="155" r="8" style="animation-delay: 0s"/>
+                    <circle class="marker-outer" cx="330" cy="155" r="14"/>
+                    <circle class="marker-inner" cx="330" cy="155" r="8"/>
+                </g>
+                
+                <!-- Boston, MA -->
+                <g class="city-marker" data-name="Boston" data-state="Massachusetts">
+                    <circle class="marker-pulse" cx="450" cy="75" r="8" style="animation-delay: 0.2s"/>
+                    <circle class="marker-outer" cx="450" cy="75" r="14"/>
+                    <circle class="marker-inner" cx="450" cy="75" r="8"/>
+                </g>
+                
+                <!-- Nashville, TN -->
+                <g class="city-marker" data-name="Nashville" data-state="Tennessee">
+                    <circle class="marker-pulse" cx="210" cy="195" r="8" style="animation-delay: 0.4s"/>
+                    <circle class="marker-outer" cx="210" cy="195" r="14"/>
+                    <circle class="marker-inner" cx="210" cy="195" r="8"/>
+                </g>
+                
+                <!-- State College, PA -->
+                <g class="city-marker" data-name="State College" data-state="Pennsylvania">
+                    <circle class="marker-pulse" cx="330" cy="115" r="8" style="animation-delay: 0.6s"/>
+                    <circle class="marker-outer" cx="330" cy="115" r="14"/>
+                    <circle class="marker-inner" cx="330" cy="115" r="8"/>
+                </g>
+                
+                <!-- Burlington, VT -->
+                <g class="city-marker" data-name="Burlington" data-state="Vermont">
+                    <circle class="marker-pulse" cx="410" cy="35" r="8" style="animation-delay: 0.8s"/>
+                    <circle class="marker-outer" cx="410" cy="35" r="14"/>
+                    <circle class="marker-inner" cx="410" cy="35" r="8"/>
+                </g>
+                
+                <!-- NYC, NY -->
+                <g class="city-marker" data-name="New York City" data-state="New York">
+                    <circle class="marker-pulse" cx="355" cy="95" r="8" style="animation-delay: 1s"/>
+                    <circle class="marker-outer" cx="355" cy="95" r="14"/>
+                    <circle class="marker-inner" cx="355" cy="95" r="8"/>
+                </g>
+                
+                <!-- Washington, DC -->
+                <g class="city-marker" data-name="Washington" data-state="D.C.">
+                    <circle class="marker-pulse" cx="390" cy="175" r="8" style="animation-delay: 1.2s"/>
+                    <circle class="marker-outer" cx="390" cy="175" r="14"/>
+                    <circle class="marker-inner" cx="390" cy="175" r="8"/>
+                </g>
+                
+                <!-- Evanston, IL -->
+                <g class="city-marker" data-name="Evanston" data-state="Illinois">
+                    <circle class="marker-pulse" cx="210" cy="115" r="8" style="animation-delay: 1.4s"/>
+                    <circle class="marker-outer" cx="210" cy="115" r="14"/>
+                    <circle class="marker-inner" cx="210" cy="115" r="8"/>
+                </g>
+                
+                <!-- San Diego, CA -->
+                <g class="city-marker" data-name="San Diego" data-state="California">
+                    <circle class="marker-pulse" cx="25" cy="170" r="8" style="animation-delay: 1.6s"/>
+                    <circle class="marker-outer" cx="25" cy="170" r="14"/>
+                    <circle class="marker-inner" cx="25" cy="170" r="8"/>
+                </g>
+                
+                <!-- Hampton Roads, VA -->
+                <g class="city-marker" data-name="Hampton Roads" data-state="Virginia">
+                    <circle class="marker-pulse" cx="350" cy="170" r="8" style="animation-delay: 1.8s"/>
+                    <circle class="marker-outer" cx="350" cy="170" r="14"/>
+                    <circle class="marker-inner" cx="350" cy="170" r="8"/>
+                </g>
+            </svg>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot"></span>Richmond, VA</div>
+            <div class="legend-item"><span class="legend-dot"></span>Boston, MA</div>
+            <div class="legend-item"><span class="legend-dot"></span>Nashville, TN</div>
+            <div class="legend-item"><span class="legend-dot"></span>State College, PA</div>
+            <div class="legend-item"><span class="legend-dot"></span>Burlington, VT</div>
+            <div class="legend-item"><span class="legend-dot"></span>NYC, NY</div>
+            <div class="legend-item"><span class="legend-dot"></span>Washington, DC</div>
+            <div class="legend-item"><span class="legend-dot"></span>Evanston, IL</div>
+            <div class="legend-item"><span class="legend-dot"></span>San Diego, CA</div>
+            <div class="legend-item"><span class="legend-dot"></span>Hampton Roads, VA</div>
+        </div>
+    </div>
+    
+    <script>
+        const tooltip = document.getElementById('tooltip');
+        const tipName = document.getElementById('tipName');
+        const tipState = document.getElementById('tipState');
+        const mapArea = document.querySelector('.map-area');
+        
+        document.querySelectorAll('.city-marker').forEach(marker => {
+            marker.addEventListener('mouseenter', (e) => {
+                tipName.textContent = marker.dataset.name;
+                tipState.textContent = marker.dataset.state;
+                tooltip.classList.add('show');
+            });
+            
+            marker.addEventListener('mousemove', (e) => {
+                const rect = mapArea.getBoundingClientRect();
+                tooltip.style.left = (e.clientX - rect.left) + 'px';
+                tooltip.style.top = (e.clientY - rect.top - 50) + 'px';
+                tooltip.style.transform = 'translateX(-50%)';
+            });
+            
+            marker.addEventListener('mouseleave', () => {
+                tooltip.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>
