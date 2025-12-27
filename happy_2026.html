@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy 2026!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:wght@600;700;800&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 40px;
+        }
+        
+        .happy {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(28px, 6vw, 52px);
+            font-weight: 600;
+            color: #6366f1;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .year {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(80px, 20vw, 180px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899, #f472b6);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 5s ease infinite, scaleIn 1s ease-out;
+            cursor: pointer;
+            transition: transform 0.3s;
+            line-height: 1;
+        }
+        
+        .year:hover {
+            transform: scale(1.05);
+        }
+        
+        .message {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(16px, 4vw, 28px);
+            color: #64748b;
+            margin-top: 24px;
+            animation: fadeInUp 1s ease-out 0.3s both;
+            line-height: 1.5;
+        }
+        
+        .subtitle {
+            font-size: clamp(12px, 2.5vw, 16px);
+            color: #94a3b8;
+            margin-top: 30px;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Floating icons */
+        .floater {
+            position: absolute;
+            opacity: 0;
+            animation: floatUp 4s ease-out forwards;
+            pointer-events: none;
+            font-size: 24px;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                opacity: 0.8;
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-200px) scale(0.5) rotate(20deg);
+            }
+        }
+        
+        /* Gentle sparkles */
+        .sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: gentleTwinkle 3s ease-in-out infinite;
+        }
+        
+        @keyframes gentleTwinkle {
+            0%, 100% { opacity: 0.1; transform: scale(0.8); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        
+        /* Glow burst on click */
+        .glow-burst {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: glowExpand 0.8s ease-out forwards;
+        }
+        
+        @keyframes glowExpand {
+            0% {
+                opacity: 0.6;
+                transform: scale(1);
+                box-shadow: 0 0 20px currentColor;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(4);
+                box-shadow: 0 0 40px currentColor;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="happy">Happy</div>
+        <div class="year" id="year">2026</div>
+        <div class="message">Wishing you the best year ahead</div>
+        <div class="subtitle">✨ Click anywhere to celebrate ✨</div>
+    </div>
+    
+    <script>
+        const emojis = ['✨', '🌟', '⭐', '💫', '🎊', '🎉'];
+        const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f472b6', '#60a5fa', '#a78bfa'];
+        
+        // Create gentle sparkles
+        function createSparkles() {
+            for (let i = 0; i < 25; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + 'vw';
+                sparkle.style.top = Math.random() * 100 + 'vh';
+                sparkle.style.animationDelay = Math.random() * 3 + 's';
+                sparkle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                sparkle.style.boxShadow = `0 0 10px ${sparkle.style.background}`;
+                document.body.appendChild(sparkle);
+            }
+        }
+        
+        // Create floating emoji
+        function createFloater(x, y) {
+            const floater = document.createElement('div');
+            floater.className = 'floater';
+            floater.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            floater.style.left = (x - 12) + 'px';
+            floater.style.top = y + 'px';
+            floater.style.animationDuration = (3 + Math.random() * 2) + 's';
+            document.body.appendChild(floater);
+            
+            setTimeout(() => floater.remove(), 5000);
+        }
+        
+        // Create glow burst
+        function createGlow(x, y) {
+            const glow = document.createElement('div');
+            glow.className = 'glow-burst';
+            glow.style.left = (x - 10) + 'px';
+            glow.style.top = (y - 10) + 'px';
+            glow.style.color = colors[Math.floor(Math.random() * colors.length)];
+            glow.style.background = glow.style.color;
+            document.body.appendChild(glow);
+            
+            setTimeout(() => glow.remove(), 800);
+        }
+        
+        // Click handler
+        document.addEventListener('click', (e) => {
+            createGlow(e.clientX, e.clientY);
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const offsetX = (Math.random() - 0.5) * 60;
+                    const offsetY = (Math.random() - 0.5) * 60;
+                    createFloater(e.clientX + offsetX, e.clientY + offsetY);
+                }, i * 100);
+            }
+        });
+        
+        // Initialize
+        createSparkles();
+        
+        // Occasional ambient floaters
+        setInterval(() => {
+            const x = Math.random() * window.innerWidth;
+            const y = window.innerHeight * 0.8 + Math.random() * window.innerHeight * 0.2;
+            createFloater(x, y);
+        }, 4000);
+    </script>
+</body>
+</html>
